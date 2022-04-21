@@ -5,9 +5,6 @@ import sys
 from multiprocessing import Process
 
 
-
-
-#pravi klasu tacka koja sadrzi koordinate
 class point:
     def __init__(self, x,y,z):
         self.x = x
@@ -16,7 +13,6 @@ class point:
 
 
 
-#pravi klasu telo (body) koja ima lokaciju, masu, brzinu, ime
 class body:
     def __init__(self, location, mass, velocity, name = ""):
         self.location = location
@@ -25,9 +21,6 @@ class body:
         self.name = name
 
 
-
-#Ova funkcija uzima listu tela, i indeks tela koje posmatramo (target_body). 
-#Onda prolazimo kroz sva druga tela i dodajemo ubrzanje posmatranom telu (target_body-ju)
 def calculate_single_body_acceleration(bodies, body_index):
     G_const = 6.67408e-11 #m3 kg-1 s-2
     acceleration = point(0,0,0)
@@ -45,8 +38,6 @@ def calculate_single_body_acceleration(bodies, body_index):
 
 
 
-#Kada znamo ubrzanje prelazimo na sledeci korak, a to je racunanje brzine
-#Novu brzinu racunamo mnozenjem ubrzanja (acceleration) sa vremenskim korakom (time_step) i dodavanjem toga na trenutnu brzinu
 def compute_velocity(bodies, time_step = 1):
     for body_index, target_body in enumerate(bodies):
         acceleration = calculate_single_body_acceleration(bodies, body_index)
@@ -57,8 +48,6 @@ def compute_velocity(bodies, time_step = 1):
 
 
 
-#kad su sve brzine apdejtovane, mozemo promeniti poziciju svih tela 
-#to radimo tako sto racunamo duzinu koju su presli u vremenskom koraku (velocity x time) i dodavanjem toga na trenutnu poziciju
 def update_location(bodies, time_step = 1):
     for target_body in bodies:
         target_body.location.x += target_body.velocity.x * time_step
@@ -67,15 +56,11 @@ def update_location(bodies, time_step = 1):
 
 
 
-
-#prethodne dve funkcije mozemo smestiti u jednu
 def compute_gravity_step(bodies, time_step = 1):
     compute_velocity(bodies, time_step = time_step)
     update_location(bodies, time_step = time_step)
 
 
-#Dok traje simulacija jedina neophodna informacija je x,y,z koordinate nasih tela.
-#Da bismo pokrenuli simulaciju ponavljati ove gore kalkulacije zeljeni broj puta i sacuvati istoriju lokacija
 def run_simulation(bodies, names = None, time_step = 1, number_of_steps = 10000, report_freq = 100):
 
     body_locations_hist = []
@@ -95,7 +80,6 @@ def run_simulation(bodies, names = None, time_step = 1, number_of_steps = 10000,
 
 
 
-#podaci o planetama (lokacija (m), masa (kg), brzina (m/s)
 sun = {"location":point(0,0,0), "mass":2e30, "velocity":point(0,0,0)}
 mercury = {"location":point(0,5.7e10,0), "mass":3.285e23, "velocity":point(47000,0,0)}
 venus = {"location":point(0,1.1e11,0), "mass":4.8e24, "velocity":point(35000,0,0)}
@@ -111,8 +95,6 @@ pluto = {"location":point(0,3.7e12,0), "mass":1.3e22, "velocity":point(4748,0,0)
 
 
 if __name__ == "__main__":
-
-#lista planeta koje zelimo u simulaciji
 
     bodies = [ [
         body( location = sun["location"], mass = sun["mass"], velocity = sun["velocity"], name = "sun"),
@@ -140,14 +122,14 @@ if __name__ == "__main__":
         ],
 	]
          
-#normalno pokretanje
+#normal run
     poc = time.time()
 
     motions = run_simulation(bodies[0], time_step = 100, number_of_steps = 80000, report_freq = 1000)
     
     print('bez paral: ', time.time() - poc, 's')
 
-#paralelizacija
+#parallelisation run
     poc = time.time()
 
     p = Process(target = run_simulation, args = bodies)
